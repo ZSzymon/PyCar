@@ -13,31 +13,22 @@ class Vision(threading.Thread):
     _debug = False
     _overlayPicture = None
 
-    def __init__(self, cameraId=0, overlayPath=None, cameraResolution=(480, 640)):
+    def __init__(self, cameraId=0, overlayPath=None, cameraResolution=(640, 480)):
         self._cameraId = cameraId
         super().__init__()
         self._debug = settings.DEBUG
 
         if overlayPath is not None:
-            """Overlay picture must be same resolution as camera. 
+            """ Load and preapre overlay picture.
+                Overlay picture must be same resolution as camera. 
             """
             overlayPicture = cv.imread(overlayPath)
-            overlayPicture = cv.resize(overlayPicture, (640, 480), interpolation=cv.INTER_AREA)
+            overlayPicture = cv.resize(overlayPicture, cameraResolution, interpolation=cv.INTER_AREA)
             self._overlayPicture = overlayPicture
-            pass
         self.cameraResolution = cameraResolution
 
-    def resizePicture(self, img, newResolution):
-        """Method resizes photo and returns new photo.
-
-        :param newResolution: new resolution for picture.
-        :param img: image to resize
-        :return: resized photo
-        """
-        return cv.resize(img, newResolution, interpolation=cv.INTER_AREA)
-
     @staticmethod
-    def addOverlay(background, foreground, x=0, y=0):
+    def addOverlay(background, foreground):
         """Use this method in frameLock context.
 
         :return: Picture with overlay
@@ -45,11 +36,17 @@ class Vision(threading.Thread):
         alpha = 1
         beta = 1
         dst = cv.addWeighted(background, alpha, foreground, beta, 0.2)
-
         return dst
 
     def handleCamera(self):
-        cap = cv.VideoCapture(self._cameraId)
+        """Logic to handling connection with camera and updating self._frame atribute.
+
+        """
+        def connectVideo():
+            """Separate method to get camera connection in case of future problems with diffrent cameras."""
+            return cv.VideoCapture(self._cameraId)
+
+        cap = connectVideo()
         if not cap.isOpened():
             raise exceptions.CameraNotFound
 
@@ -62,16 +59,20 @@ class Vision(threading.Thread):
         cap.release()
         pass
 
-    def setFrame(self, screenShot):
+    def setFrame(self, frame):
+        """Setter for frame attribute. ThreadSafe.
+
+        :param frame: frame to update
+        :return:
+        """
         with self._frameLock:
-            self._frame = screenShot
+            self._frame = frame
 
     def getFrame(self):
-        """ Methods return frame atribute. It's possible that frame is None.
+        """ Methods return frame attribute. It's possible that frame is None.
             That means handleCamera does not created frame already.
 
-
-        :return: frame from camer.
+        :return: frame from camera.
         """
         with self._frameLock:
             frame = self._frame
