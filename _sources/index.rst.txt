@@ -1,0 +1,37 @@
+.. PyCar documentation master file, created by
+   sphinx-quickstart on Mon Aug 23 09:15:46 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to PyCar's documentation!
+=================================
+
+.. toctree::
+   :maxdepth: 5
+   :caption: Contents:
+
+   includeme
+
+Camera vision
+==============
+.. automodule:: src.cameraVision.vision
+   :members:
+
+Camera vision exceptions
+========================
+.. automodule:: src.cameraVision.exceptions
+   :members:
+
+Graphical User Interface
+========================
+.. automodule:: src.gui
+   :members:
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
